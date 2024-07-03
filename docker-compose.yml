@@ -1,0 +1,84 @@
+services:
+  database:
+    image: postgres:latest // replace db with postgis if you need geopoints or add the postgis extension to postgres.
+    container_name: postgres
+    restart: always
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: directus
+      POSTGRES_PASSWORD: "app_db_passwords"
+      POSTGRES_DB: directus
+      #POSTGRES_MULTIPLE_DATABASES: db1,db2
+    networks:
+      - directus_network
+  cache:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    networks:
+      - directus_network 
+  directus:
+    image: directus/directus:latest
+    container_name: directus
+    restart: always
+    ports:
+      - 8055:8055
+    depends_on:
+      cache:
+        condition: service_started
+      database:
+        condition: service_started
+    environment:
+      KEY: 'random-key'
+      SECRET: 'random-secret'
+      ADMIN_EMAIL: "your_email@gmail.com"
+      ADMIN_PASSWORD: "app_passwords"
+      DATABASE_CLIENT: pg
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_DATABASE: directus
+      DATABASE_USER: directus
+      DATABASE_PASSWORD: "app_db_passwords"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CACHE_ENABLED: "true"
+      REDIS: redis://cache:6379
+      CACHE_STORE: redis
+    env_file:
+      - .env
+    volumes:
+      - ./hooks:/directus/hooks
+      - ./extensions:/directus/extensions
+      - ./layouts:/directus/layouts
+      - ./modules:/directus/modules
+      - ./operations:/directus/operations
+      - ./panels:/directus/panels
+      - ./themes:/directus/themes
+      - ./endpoints:/directus/endpoints
+      - ./displays:/directus/displays
+      - ./fields:/directus/fields
+      - ./flows:/directus/flows
+      - ./uploads:/directus/uploads
+      - ./data/uploads:/directus/public/uploads
+      - ./snapshots:/directus/snapshots/snapshot.yaml
+      - ./templates:/directus/templates
+      - ./config:/directus/config # Config data
+    networks:
+     - directus_network 
+  sveltekit:
+    build: ./frontend
+    container_name: sveltekit
+    volumes:
+      - ./frontend:/
+       - /frontend/node_modules
+    ports:
+      - 3000:3000
+    networks:
+      - directus_network
+    environment:
+      VITE_DIRECTUS_URL: http://localhost:8055
+
+networks:
+  directus_network:
+    driver: bridge
