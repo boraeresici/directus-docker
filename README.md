@@ -30,5 +30,3 @@ docker compose:
 docker run -d -p ExternalPort:InternalPort <imagename:tag>
 
 or install vscode docker extension and right click on "docker-compose.yml" file and say up /down /restart.
-
-Translated with DeepL.com (free version)
