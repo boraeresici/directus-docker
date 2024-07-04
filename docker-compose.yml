@@ -32,7 +32,7 @@ services:
     environment:
       KEY: 'random-key'
       SECRET: 'random-secret'
-      ADMIN_EMAIL: directus_admin_mail@gmail.com
+      ADMIN_EMAIL: adminmail@gmail.com
       ADMIN_PASSWORD: admin_pass
       DATABASE_CLIENT: pg
       DATABASE_HOST: postgres
@@ -68,19 +68,24 @@ services:
      - directus_network 
   app:
     build:
-      context: ./app
+      context: ./app2
       dockerfile: Dockerfile
     container_name: sveltekit
+    image: app-website
+    user: "node"
+    command: npm run dev
     restart: always
     volumes:
-      - ./app:/app
-      - /app/node_modules
+      - ./app2:/app
+      - /app2/node_modules
     ports:
-      - 3000:3000
+      - 3000:5137
     networks:
       - directus_network
     environment:
+      ENV NODE_ENV: development
       VITE_DIRECTUS_URL: http://localhost:8055
+      VITE_APP2_URL: http://localhost:3000
 
 networks:
   directus_network:
