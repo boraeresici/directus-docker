@@ -6,7 +6,8 @@ Allows you to manage the application family in a docker container.
 1- docker application (win/macos/linux) or extension (vscode) must be installed.
 2- replace db with postgis if you need geopoints or add the postgis extension to postgres.
 3- automatic snapshot will be added later.
-4- sveltekit (https://kit.svelte.dev/) must be installed in the prje folder. 
+4- The ".env" file is given as base and should be edited according to the needs.
+5- sveltekit (https://kit.svelte.dev/) must be installed in the prje folder. 
 
 npm create svelte@latest my-app
 cd my-app
