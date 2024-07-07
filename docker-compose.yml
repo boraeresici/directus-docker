@@ -81,7 +81,7 @@ services:
     ports:
       - 3000:3000 # for vite 
       - 24678:24678 # for Vite HMR 
-      - 5173:5173  # standart port for vite 
+      - 5174:5173  # standart port for vite 
       #- 5173:3000
     networks:
       - directus_network
