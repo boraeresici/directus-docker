@@ -1,28 +1,31 @@
 # Stage 1: Build
-FROM node:lts AS builder
+FROM node:18-alpine AS builder
 
 # A small line inside the image to show who made it
 LABEL Developers="Bora ERESICI"
 
-WORKDIR /app2
+WORKDIR /frontend
 
 COPY package*.json .
 #COPY pnpm-lock.yaml .
 
-# Clean install all node modules
-RUN npm ci
-
-RUN npm i -g pnpm
+# Install dependencies
 RUN npm install
 
 # Copy all local files into the image
 COPY . .
 
+# Build application
 RUN npm run build
-RUN npm prune --prod
 
 # Delete source code files that were used to build the app that are no longer needed
 RUN rm -rf src/ static/ emailTemplates/ docker-compose.yml
+
+# .vite CHMODs
+RUN mkdir -p /frontend/node_modules/.vite
+RUN chmod -R 777 /frontend/node_modules/.vite
+RUN ls -la /frontend/node_modules/.vite
+
 
 # The USER instruction sets the user name to use as the default user for the remainder of the current stage
 USER node:node
@@ -30,14 +33,20 @@ USER node:node
 # Stage 2: Deploy
 FROM node:lts AS deployer
 
-WORKDIR /app2
+WORKDIR /frontend
 
-#COPY --from=builder /app2/build ./build
-COPY --from=builder /app2/package.json .
+# Copy built artifacts from builder stage
+#COPY --from=builder /frontend/dist ./dist
+COPY --from=builder /frontend/node_modules ./node_modules
+COPY --from=builder /frontend/package.json .
+#COPY --from=builder /frontend/build ./build
 
 EXPOSE 3000
+EXPOSE 24678
 
 ENV NODE_ENV=production
 ENV HOST=0.0.0.0
+ENV HOST=localhost:5173
 
-CMD ["node", "build/index.js"]
+# Run `yarn dev` and set the host to 0.0.0.0 so we can access the web app from outside
+CMD ["yarn", "dev", "--host", ,"vite --host", "0.0.0.0", "dist/index.js"]
