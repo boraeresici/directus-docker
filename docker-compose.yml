@@ -68,22 +68,25 @@ services:
      - directus_network 
   app:
     build:
-      context: ./app2
-      dockerfile: Dockerfile
+      context: ./frontend
+      dockerfile: .dockerfile
     container_name: sveltekit
-    image: app-website
+    image: frontend
     user: "node"
     command: npm run dev
-    restart: always
+    restart: on-failure
     volumes:
-      - ./app2:/app
-      - /app2/node_modules
+      - ./frontend:/frontend/
+      - /frontend/node_modules
     ports:
-      - 3000:5137
+      - 3000:3000 # for vite 
+      - 24678:24678 # for Vite HMR 
+      - 5173:5173  # standart port for vite 
+      #- 5173:3000
     networks:
       - directus_network
     environment:
-      ENV NODE_ENV: development
+      ENV NODE_ENV: production
       VITE_DIRECTUS_URL: http://localhost:8055
       VITE_APP2_URL: http://localhost:3000
 
